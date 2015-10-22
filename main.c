@@ -85,12 +85,12 @@ char* node_name(SExpression *e){
 void write_tree(SExpression *e, FILE *dotfile, int node);
 
 void write_node(SExpression *e, FILE *dotfile, int node, int parent){
-  fprintf(dotfile, " %i -> %i \n", parent, node);
+  fprintf(dotfile, " %i -> %i;\n", parent, node);
   write_tree(e, dotfile, node);
 }
 
 void write_tree(SExpression *e, FILE *dotfile, int node){
-  fprintf(dotfile, "%i [label=\"%s\"];\n", node, node_name(e));
+  fprintf(dotfile, " %i [label=\"%s\"];\n", node, node_name(e));
   if (e->left != NULL) write_node(e->left, dotfile, 2*node, node);
   if (e->right != NULL) write_node(e->right, dotfile, 2*node+1, node);
 }
