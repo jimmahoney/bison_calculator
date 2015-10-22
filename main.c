@@ -8,7 +8,10 @@
 
 #include <stdio.h>
  
-int yyparse(SExpression **expression, yyscan_t scanner);
+/* 
+ // This parser declaration is in parser.h after bison runs.
+ int yyparse(SExpression **expression, yyscan_t scanner); 
+*/
 
 SExpression *getAST(const char *source_code){
   /* get Abstract Syntax Tree , i.e. 
