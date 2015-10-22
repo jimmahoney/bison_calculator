@@ -35,43 +35,53 @@ int evaluate(SExpression *e){
   }
 }
 
-#define MAX_NODE_NAME_CHARS 8
+/* Output a graphviz.org representation of the parse tree to file tree.dot.
+   (To generate an image of the tree after this runs, install the 
+   graphviz "dot" software and at the command prompt run :
+       dot -Tpng < tree.dot > tree.png 
+   )
+*/
+void write_graphviz(SExpression *e);
 
-void write_node(SExpression *e, FILE *dotfile, int node_number){
-  char node_name[MAX_NODE_NAME_CHARS + 1];
-  int this_number = node_number;
+
+/* recursive descent pieces of write_graphviz */
+void write_tree(SExpression *e, FILE *dotfile, int node);
+void write_node(SExpression *e, FILE *dotfile, int node, int parent);
+
+/* return char* description of parse tree node, e.g. '+', '-', '3', etc */
+char* node_name(SExpression *e){
+  char* name = (char *)malloc(16);  /* up to 15 char descriptive node name */
   switch (e->type){
   case eVALUE:
-    sprintf(node_name, "%i", e->value);
-    break;
+    sprintf(name, "%i", e->value);
+    return name;
   case eMULTIPLY:
-    sprintf(node_name, "*");
-    break;
+    sprintf(name, "*");
+    return name;
   case ePLUS:
-    sprintf(node_name, "+");
-    break;
-  }
-  fprintf(dotfile, "%i [label=\"%s\"];\n", this_number, node_name);
-  if (e->left != NULL){
-    node_number++;
-    fprintf(dotfile, " %i -> %i \n", this_number, node_number);
-    write_node(e->left, dotfile, node_number);
-  }
-  if (e->right != NULL){
-    node_number++;
-    fprintf(dotfile, " %i -> %i \n", this_number, node_number);
-    write_node(e->right, dotfile, node_number);
+    sprintf(name, "+");
+    return name;
+  default:  // shouldn't get here
+    sprintf(name, "???");
+    return name;
   }
 }
 
+void write_node(SExpression *e, FILE *dotfile, int node, int parent){
+  fprintf(dotfile, " %i -> %i \n", parent, node);
+  write_tree(e, dotfile, node);
+}
+
+void write_tree(SExpression *e, FILE *dotfile, int node){
+  fprintf(dotfile, "%i [label=\"%s\"];\n", node, node_name(e));
+  if (e->left != NULL) write_node(e->left, dotfile, 2*node, node);
+  if (e->right != NULL) write_node(e->right, dotfile, 2*node+1, node);
+}
+
 void write_graphviz(SExpression *e){
-  /* Output a graphviz.org representation of parse tree to file tree.dot.
-     To generate an image of the tree, install the graphviz "dot" software
-     and run at the command prompt " dot -Tpng < tree.dot > tree.png ".
-   */
   FILE *dotfile = fopen("tree.dot", "w");
   fprintf(dotfile, "digraph tree {\n");
-  write_node(e, dotfile, 1);
+  write_tree(e, dotfile, 1);
   fprintf(dotfile, "}\n");
   fclose(dotfile);
 }
