@@ -1,7 +1,7 @@
 # bison_calculator
 
-A sample bison compiler based on https://en.wikipedia.org/wiki/GNU_bison,
-which an algebraic calculator definition and compilation example
+A sample bison compiler based on https://en.wikipedia.org/wiki/GNU_bison - 
+an algebraic calculator definition and compilation example
 including the creation and evaluation of a syntax tree.
 
 ## files
