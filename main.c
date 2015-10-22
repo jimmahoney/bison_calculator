@@ -12,7 +12,7 @@ int yyparse(SExpression **expression, yyscan_t scanner);
 
 SExpression *getAST(const char *source_code){
   /* get Abstract Syntax Tree , i.e. 
-     source_code (text) => parse_tree (SExpression is root node) */
+     source_code as text => parse_tree with SExpression for root node */
   SExpression *expression;
   yyscan_t scanner;
   YY_BUFFER_STATE state;
