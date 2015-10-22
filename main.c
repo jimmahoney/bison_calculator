@@ -9,18 +9,35 @@
 #include <stdio.h>
  
 int yyparse(SExpression **expression, yyscan_t scanner);
- 
-SExpression *getAST(const char *expr){
+
+SExpression *getAST(const char *source_code){
+  /* get Abstract Syntax Tree , i.e. 
+     source_code (text) => parse_tree (SExpression is root node) */
   SExpression *expression;
   yyscan_t scanner;
   YY_BUFFER_STATE state;
-  if (yylex_init(&scanner)) return NULL;            // couldn't initialize
-  state = yy_scan_string(expr, scanner);
-  if (yyparse(&expression, scanner)) return NULL;   // error parsing
-  yy_delete_buffer(state, scanner);
+  int parse_status;
+  int lex_status;
+
+  lex_status = yylex_init(&scanner);              // initialize lexer
+  if (lex_status) return NULL;                    // ... failed.
+
+  state = yy_scan_string(source_code, scanner);   // do lexical analysis
+
+  parse_status = yyparse(&expression, scanner);   // create parse tree
+  if (parse_status) return NULL;                  // error while parsing
+
+  yy_delete_buffer(state, scanner);               // clean up 
   yylex_destroy(scanner);
+
   return expression;
 }
+
+/* -- "execute" the parse tree -- 
+ *
+ *  (This is where the "now run it" part would
+ *   happen for a larger programming language.)
+ */
  
 int evaluate(SExpression *e){
   switch (e->type) {
@@ -35,21 +52,17 @@ int evaluate(SExpression *e){
   }
 }
 
-/* Output a graphviz.org representation of the parse tree to file tree.dot.
-   (To generate an image of the tree after this runs, install the 
-   graphviz "dot" software and at the command prompt run :
+/* -- start graphviz parse tree code -- 
+ *
+ * write_graphviz(expression) creates the file tree.dot
+ * which can be used to generate an image of the parse tree
+ * using the graphiz.org "dot" command, i.e.
+
        dot -Tpng < tree.dot > tree.png 
-   )
-*/
-void write_graphviz(SExpression *e);
+ */
 
-
-/* recursive descent pieces of write_graphviz */
-void write_tree(SExpression *e, FILE *dotfile, int node);
-void write_node(SExpression *e, FILE *dotfile, int node, int parent);
-
-/* return char* description of parse tree node, e.g. '+', '-', '3', etc */
 char* node_name(SExpression *e){
+  /* return char* description of parse tree node, e.g. '+', '-', '3', etc */
   char* name = (char *)malloc(16);  /* up to 15 char descriptive node name */
   switch (e->type){
   case eVALUE:
@@ -66,6 +79,10 @@ char* node_name(SExpression *e){
     return name;
   }
 }
+
+/* We need to declare this before write_node so
+   that the recursive mutual calls compile properly. */
+void write_tree(SExpression *e, FILE *dotfile, int node);
 
 void write_node(SExpression *e, FILE *dotfile, int node, int parent){
   fprintf(dotfile, " %i -> %i \n", parent, node);
@@ -85,7 +102,9 @@ void write_graphviz(SExpression *e){
   fprintf(dotfile, "}\n");
   fclose(dotfile);
 }
- 
+
+/* -- main -- */
+
 int main(void){
   SExpression *e = NULL;
   char test[] = " 4 + 2*10 + 3*( 5 + 1 ) ";
