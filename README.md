@@ -45,6 +45,7 @@ to /usr/local/bin .
 * adjusted C styling to suit my preferences
 * removed yyerror() declration to avoid a compiler "duplicate symbol" error (apparently bison generates one of these too, and I didn't track down how to keep the new one instead)
 * added "-x c " compiler flag to avoid compiler C++ warnings
+# graphviz representation of the parse tree is now output to tree.dot in main.c
 
 ## running it
 
@@ -54,8 +55,12 @@ to /usr/local/bin .
     /usr/local/bin/bison parser.y
     g++ -g -x c -ansi lexer.c parser.c expression.c main.c -o test
 
-    $ ./test
+    $ ./test  # also creates tree.dot
     Result of ' 4 + 2*10 + 3*( 5 + 1 ) ' is 42
+
+    # generate parse tree image from tree.dot
+    $ dot -Tpng < tree.dot > tree.png
+
 ```
 
   
